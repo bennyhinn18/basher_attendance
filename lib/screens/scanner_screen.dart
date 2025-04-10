@@ -305,6 +305,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         underline: const SizedBox(),
         isExpanded: true,
         icon: const Icon(Icons.arrow_drop_down),
+        // Add this line to increase dropdown item height
+        itemHeight: 60,
         items: _activeEvents.map((Event event) {
           return DropdownMenuItem<Event>(
             value: event,
@@ -315,11 +317,13 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    // Change from mainAxisSize.min to center alignment
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         event.title,
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       Text(
                         '${event.pointValue} points',
