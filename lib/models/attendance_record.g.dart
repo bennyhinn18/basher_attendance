@@ -17,21 +17,36 @@ class AttendanceRecordAdapter extends TypeAdapter<AttendanceRecord> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AttendanceRecord(
-      rollNumber: fields[0] as String,
-      timestamp: fields[1] as DateTime,
-      name: fields[2] as String?,
+      id: fields[0] as String?,
+      memberId: fields[1] as String,
+      eventId: fields[2] as String,
+      timestamp: fields[3] as DateTime,
+      memberName: fields[4] as String?,
+      type: fields[5] as String?,
+      rollNumber: fields[6] as String?,
+      name: fields[7] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AttendanceRecord obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(8)
       ..writeByte(0)
-      ..write(obj.rollNumber)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.timestamp)
+      ..write(obj.memberId)
       ..writeByte(2)
+      ..write(obj.eventId)
+      ..writeByte(3)
+      ..write(obj.timestamp)
+      ..writeByte(4)
+      ..write(obj.memberName)
+      ..writeByte(5)
+      ..write(obj.type)
+      ..writeByte(6)
+      ..write(obj.rollNumber)
+      ..writeByte(7)
       ..write(obj.name);
   }
 

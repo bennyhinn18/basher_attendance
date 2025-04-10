@@ -9,10 +9,12 @@ class AttendanceService {
   final Box<AttendanceRecord> _box = Hive.box<AttendanceRecord>('attendance_records');
 
   // Add a new attendance record
-  Future<void> addRecord(String rollNumber, {String? name}) async {
+  Future<void> addRecord(String rollNumber, {String? name, required String userId, required String eventId}) async {
     final record = AttendanceRecord(
-      rollNumber: rollNumber,
+      memberId: userId,
+      eventId: eventId,
       timestamp: DateTime.now(),
+      rollNumber: rollNumber,
       name: name,
     );
     await _box.add(record);

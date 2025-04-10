@@ -219,7 +219,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final record = _records[index];
                             return ListTile(
                               leading: CircleAvatar(
-                                child: Text(record.rollNumber.substring(0, 2)),
+                                child: Text(record.rollNumber?.substring(0, 2) ?? "??"),
                               ),
                               title: Text('Roll No: ${record.rollNumber}'),
                               subtitle: Text(

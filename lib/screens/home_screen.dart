@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'scanner_screen.dart';
 import 'dashboard_screen.dart';
 import 'settings_screen.dart';
+import 'events/events_screen.dart';
+import 'leaderboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,7 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
   
   final List<Widget> _screens = [
     const ScannerScreen(),
+    const EventsScreen(),
     const DashboardScreen(),
+    const LeaderboardScreen(),
     const SettingsScreen(),
   ];
 
@@ -36,8 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Scan',
           ),
           NavigationDestination(
+            icon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.leaderboard),
+            label: 'Leaderboard',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings),
