@@ -9,7 +9,7 @@ class AttendanceRecord {
   final String? id;
 
   @HiveField(1)
-  final String memberId;
+  final int memberId;
 
   @HiveField(2)
   final String eventId;
@@ -43,7 +43,7 @@ class AttendanceRecord {
   // Convert to JSON for Supabase
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      
       'member_id': memberId,
       'event_id': eventId,
       'timestamp': timestamp.toIso8601String(),
@@ -57,7 +57,7 @@ class AttendanceRecord {
   // Create from JSON for Supabase
   static AttendanceRecord fromJson(Map<String, dynamic> json) {
     return AttendanceRecord(
-      id: json['id'],
+      
       memberId: json['member_id'],
       eventId: json['event_id'],
       timestamp: DateTime.parse(json['timestamp']),
@@ -68,3 +68,4 @@ class AttendanceRecord {
     );
   }
 }
+

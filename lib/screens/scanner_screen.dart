@@ -116,6 +116,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         final record = AttendanceRecord(
           memberId: member.id,
           eventId: _selectedEvent!.id,
+          rollNumber: barcodeScanRes,
+          type: 'scan',
           timestamp: DateTime.now(), // Add this line
           memberName: member.name,
         );

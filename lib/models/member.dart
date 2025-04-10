@@ -1,5 +1,5 @@
 class Member {
-  final String id;
+  final int id;  // Changed from String to int
   final String name;
   final String rollNumber;
   final String? email;
@@ -19,7 +19,7 @@ class Member {
 
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
-      id: json['id'],
+      id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,  // Handle both string and int
       name: json['name'],
       rollNumber: json['roll_number'],
       email: json['email'],

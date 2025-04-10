@@ -22,7 +22,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
   bool _isSubmitting = false;
   List<Member> _members = [];
   List<Member> _filteredMembers = [];
-  List<String> _selectedMemberIds = [];
+  List<int> _selectedMemberIds = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -72,7 +72,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     });
   }
 
-  void _toggleMemberSelection(String memberId) {
+  void _toggleMemberSelection(int memberId) {
     setState(() {
       if (_selectedMemberIds.contains(memberId)) {
         _selectedMemberIds.remove(memberId);
@@ -96,10 +96,12 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
 
     try {
       for (var memberId in _selectedMemberIds) {
+        final member = _members.firstWhere((m) => m.id == memberId);
         final record = AttendanceRecord(
           memberId: memberId,
           eventId: widget.event.id,
           timestamp: DateTime.now(), // Add this line
+          rollNumber: member.rollNumber,
           type: 'manual',
         );
         await _supabaseService.recordAttendance(record);

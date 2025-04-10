@@ -88,7 +88,7 @@ class SupabaseService {
         .insert(record.toJson());
     
     // Update points
-    await _updatePoints(record.memberId, record.eventId);
+    await _updatePoints(record.memberId, record.eventId.toString());
   }
 
   Future<List<AttendanceRecord>> getAttendanceForEvent(String eventId) async {
@@ -121,7 +121,7 @@ class SupabaseService {
   }
 
   // POINTS
-  Future<void> _updatePoints(String memberId, String eventId) async {
+  Future<void> _updatePoints(int memberId, String eventId) async {
     // Get event details to determine points
     final event = await getEvent(eventId);
     int pointsToAdd = event.pointValue;
@@ -139,6 +139,7 @@ class SupabaseService {
           .insert({
             'member_id': memberId,
             'points': pointsToAdd,
+            'description': 'Points for attending event $eventId',
           });
     } else {
       // Update existing points

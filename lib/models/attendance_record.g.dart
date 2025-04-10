@@ -18,7 +18,7 @@ class AttendanceRecordAdapter extends TypeAdapter<AttendanceRecord> {
     };
     return AttendanceRecord(
       id: fields[0] as String?,
-      memberId: fields[1] as String,
+      memberId: fields[1] as int,
       eventId: fields[2] as String,
       timestamp: fields[3] as DateTime,
       memberName: fields[4] as String?,
