@@ -98,7 +98,9 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       for (var memberId in _selectedMemberIds) {
         final member = _members.firstWhere((m) => m.id == memberId);
         final record = AttendanceRecord(
+          
           memberId: memberId,
+          memberName: member.name,
           eventId: widget.event.id,
           timestamp: DateTime.now(), // Add this line
           rollNumber: member.rollNumber,
@@ -118,6 +120,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error recording attendance: $e')),
         );
+        print('Error recording attendance: $e');
       }
     } finally {
       setState(() {

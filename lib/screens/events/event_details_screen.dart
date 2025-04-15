@@ -149,6 +149,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       return;
     }
     
+    // Show loading indicator 
+    setState(() {
+      _isLoading = true;
+    });
+    
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -168,27 +173,37 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         ],
       ),
     );
-
-    if (confirmed != true) return;
-
+  
+    if (confirmed != true) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+  
     try {
       await _supabaseService.deleteAttendanceRecord(recordId);
-      _loadEventDetails();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Attendance record deleted successfully')),
         );
+        // Reload data after successful deletion
+        _loadEventDetails();
       }
     } catch (e) {
+      print('Error deleting record: $e');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting attendance record: $e')),
+          SnackBar(content: Text('Error deleting attendance record: ${e.toString()}')),
         );
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -392,6 +407,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
         final record = _attendanceRecords[index];
+        print('Attendance Record: ${record.toJson()}');
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
@@ -410,9 +426,20 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 Text('Type: ${record.type}'),
               ],
             ),
-            trailing: IconButton(
+                        trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => record.id != null ? _deleteAttendanceRecord(record.id!) : null,
+              onPressed: () {
+                // Debug print to verify record ID
+                print('Record ID about to delete: ${record.id}');
+                if (record.id != null) {
+                  _deleteAttendanceRecord(record.id!);
+                } else {
+                  print('WARNING: Cannot delete record - ID is null');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Error: Record ID is null')),
+                  );
+                }
+              },
             ),
           ),
         );

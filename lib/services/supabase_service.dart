@@ -92,28 +92,65 @@ class SupabaseService {
   }
 
   Future<List<AttendanceRecord>> getAttendanceForEvent(String eventId) async {
-    final response = await _client
-        .from('attendance')
-        .select('*, members(name)')
-        .eq('event_id', eventId);
-    
-    return response.map((record) => AttendanceRecord.fromJson(record)).toList();
+    try {
+      print('Fetching attendance records for event: $eventId');
+      final response = await _client
+          .from('attendance')
+          .select('id, member_id, event_id, timestamp, member_name, type, roll_number, name')
+          .eq('event_id', eventId);
+      
+      print('Fetched ${response.length} attendance records');
+      for (var record in response) {
+        print('Record: ID=${record['id']}, Member=${record['member_name']}');
+      }
+      
+      return response.map((record) => AttendanceRecord.fromJson(record)).toList();
+    } catch (e) {
+      print('Error fetching attendance records: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteAttendanceRecord(String recordId) async {
-    final record = await _client
-        .from('attendance')
-        .select('member_id, event_id')
-        .eq('id', recordId)
-        .single();
-    
-    await _client
-        .from('attendance')
-        .delete()
-        .eq('id', recordId);
-    
-    // Recalculate points
-    await _recalculatePoints(record['member_id'], record['event_id']);
+    try {
+      print('Starting deletion process for record ID: $recordId');
+      
+      // First get the record details before deletion
+      print('Fetching record details...');
+      final recordData = await _client
+          .from('attendance')
+          .select('member_id, event_id')
+          .eq('id', recordId)
+          .single();
+      
+      print('Record data fetched: $recordData');
+      
+      // Store these values before deletion
+      final memberId = recordData['member_id'];
+      final eventId = recordData['event_id'];
+      print('Extracted memberId: $memberId, eventId: $eventId');
+      
+      // Now delete the record
+      print('Deleting attendance record...');
+      final deleteResponse = await _client
+          .from('attendance')
+          .delete()
+          .eq('id', recordId);
+      
+      print('Delete response: $deleteResponse');
+      
+      // After successful deletion, recalculate points
+      print('Recalculating points...');
+      await _recalculatePoints(memberId, eventId);
+      print('Points recalculation complete');
+      
+    } catch (e, stackTrace) {
+      print('DETAILED ERROR deleting attendance record:');
+      print('Error type: ${e.runtimeType}');
+      print('Error message: $e');
+      print('Stack trace: $stackTrace');
+      rethrow; // Re-throw to let the UI handle it
+    }
   }
 
   Future<void> manuallyAddAttendance(AttendanceRecord record) async {
@@ -126,54 +163,44 @@ class SupabaseService {
     final event = await getEvent(eventId);
     int pointsToAdd = event.pointValue;
     
-    // Check if points entry exists
-    final existingPoints = await _client
+    // Check if points entry exists for this specific event and member
+    final existingPointsForEvent = await _client
         .from('points')
         .select()
-        .eq('member_id', memberId);
+        .eq('member_id', memberId)
+        .eq('event_id', eventId);
     
-    if (existingPoints.isEmpty) {
-      // Create new points entry
+    // Only add points if no record exists for this event
+    if (existingPointsForEvent.isEmpty) {
+      // Create new points entry for this event
       await _client
           .from('points')
           .insert({
             'member_id': memberId,
+            'event_id': eventId, // Add event_id to track which event these points are for
             'points': pointsToAdd,
-            'description': 'Points for attending event $eventId',
+            'description': 'Points for attending ${event.title}',
+            'updated_at': DateTime.now().toIso8601String(),
           });
-    } else {
-      // Update existing points
-      int currentPoints = existingPoints.first['points'] ?? 0;
-      await _client
-          .from('points')
-          .update({
-            'points': currentPoints + pointsToAdd,
-          })
-          .eq('member_id', memberId);
     }
+    // If a record already exists, do nothing (prevent duplicate points)
   }
 
-  Future<void> _recalculatePoints(String memberId, String eventId) async {
-    // Get all attendance records for this member
-    final attendanceRecords = await _client
-        .from('attendance')
-        .select('event_id')
-        .eq('member_id', memberId);
+  Future<void> _recalculatePoints(dynamic memberId, String eventId) async {
+    // Make sure memberId is properly converted to int if needed
+    int memberIdInt = memberId is String ? int.parse(memberId) : memberId as int;
     
-    // Calculate total points
-    int totalPoints = 0;
-    for (var record in attendanceRecords) {
-      final event = await getEvent(record['event_id']);
-      totalPoints += event.pointValue;
+    try {
+      // Delete points entry for this specific event/member combination
+      await _client
+          .from('points')
+          .delete()
+          .eq('member_id', memberIdInt)
+          .eq('event_id', eventId);
+    } catch (e) {
+      print('Error recalculating points: $e');
+      // We can continue even if points deletion fails
     }
-    
-    // Update points
-    await _client
-        .from('points')
-        .update({
-          'points': totalPoints,
-        })
-        .eq('member_id', memberId);
   }
 
   // LEADERBOARD

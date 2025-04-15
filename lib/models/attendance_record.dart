@@ -42,8 +42,7 @@ class AttendanceRecord {
 
   // Convert to JSON for Supabase
   Map<String, dynamic> toJson() {
-    return {
-      
+    final json = {
       'member_id': memberId,
       'event_id': eventId,
       'timestamp': timestamp.toIso8601String(),
@@ -52,13 +51,23 @@ class AttendanceRecord {
       'roll_number': rollNumber,
       'name': name,
     };
+    
+    // Only include ID for existing records (when updating), not for new ones
+    if (id != null) {
+      json['id'] = id;
+    }
+    
+    return json;
   }
 
   // Create from JSON for Supabase
   static AttendanceRecord fromJson(Map<String, dynamic> json) {
+    print('Parsing record with ID: ${json['id']}');
     return AttendanceRecord(
-      
-      memberId: json['member_id'],
+      id: json['id'], // Include the ID when parsing
+      memberId: json['member_id'] is String 
+          ? int.parse(json['member_id']) 
+          : json['member_id'] as int,
       eventId: json['event_id'],
       timestamp: DateTime.parse(json['timestamp']),
       memberName: json['member_name'],
